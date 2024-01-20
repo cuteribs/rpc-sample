@@ -1,0 +1,12 @@
+syntax = "proto3";
+package RpcServer.Contracts;
+
+message HelloRequest {
+   string Name = 1;
+}
+message HelloResponse {
+   string Message = 1;
+}
+service HelloService {
+   rpc Hello (HelloRequest) returns (HelloResponse);
+}

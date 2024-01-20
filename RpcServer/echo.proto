@@ -1,0 +1,20 @@
+syntax = "proto3";
+package RpcServer.Contracts;
+import "google/protobuf/empty.proto";
+
+message PingRequest {
+   string ClientId = 1;
+   string ClientMac = 2;
+}
+message PongResponse {
+   string ClientId = 1;
+   string ClientMac = 2;
+   string ServerIp = 3;
+   string ServerMac = 4;
+   string SourceIp = 5;
+   int32 Latency = 6;
+}
+service EchoService {
+   rpc Hello (.google.protobuf.Empty) returns (PongResponse);
+   rpc Ping (PingRequest) returns (PongResponse);
+}
