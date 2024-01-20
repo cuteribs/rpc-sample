@@ -39,7 +39,13 @@ public class Program
 		services.AddScoped<IEchoService, EchoService>();
 		services.AddScoped<IHelloService, HelloService>();
 
+		services.AddEndpointsApiExplorer()
+			.AddSwaggerGen();
+
 		var app = builder.Build();
+
+		app.UseSwagger()
+			.UseSwaggerUI();
 
 		// map gRPC services
 		app.MapGrpcService<IEchoService>();
