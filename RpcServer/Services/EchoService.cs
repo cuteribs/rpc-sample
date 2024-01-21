@@ -1,24 +1,26 @@
-﻿using RpcServer.Contracts;
+﻿using ProtoBuf.Grpc;
+using RpcServer.Contracts;
 
 namespace RpcServer.Services;
 
 public class EchoService : IEchoService
 {
-	public ValueTask<PongResponse> Hello()
-		=> ValueTask.FromResult(new PongResponse
-		{
-			ServerIp = "1.1.1.1",
-			ServerMac = "00:00:00:00:00:00",
-			Latency = 100
-		});
+	public ValueTask Hello(CallContext? callContext = null)
+		=> new();
 
-	public ValueTask<PongResponse> Ping(PingRequest request)
-		=> ValueTask.FromResult(new PongResponse
+	public ValueTask<PongResponse> Ping(PingRequest request, CallContext? callContext = null)
+		=> new(new PongResponse
 		{
-			ClientId = request.ClientId,
-			ClientMac = request.ClientMac,
-			ServerIp = "1.1.1.1",
-			ServerMac = "00:00:00:00:00:00",
-			Latency = 100
+			ClientInfo = new()
+			{
+				Ip = request.ClientInfo.Ip,
+				Mac = request.ClientInfo.Mac
+			},
+			ServerInfo = new()
+			{
+				Ip = "1.1.1.1",
+				Mac = "00:00:00:00:00:00"
+			},
+			Latency = DateTime.Now
 		});
 }

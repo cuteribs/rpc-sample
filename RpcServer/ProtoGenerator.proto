@@ -1,0 +1,43 @@
+﻿syntax = "proto3";
+package RpcServer.Contracts;
+import "google/protobuf/empty.proto";
+
+message PingRequest {
+	NetworkInfo ClientInfo = 1;
+}
+
+message PongResponse {
+	NetworkInfo ClientInfo = 1;
+	NetworkInfo ServerInfo = 2;
+	.google.protobuf.Timestamp Latency = 3;
+}
+
+message NetworkInfo {
+	string Ip = 1;
+	string Mac = 2;
+	IpType IpType = 3;
+}
+
+enum IpType {
+	NONE = 0;
+	IPv4 = 3;
+	IPv6 = 4;
+}
+
+message HelloRequest {
+	string Name = 1;
+}
+
+message HelloResponse {
+	repeated string Message = 1;
+}
+
+service IEchoService {
+	rpc Ping (PingRequest) returns (PongResponse);
+	rpc Hello (.google.protobuf.Empty) returns (.google.protobuf.Empty);
+}
+
+service IHelloService {
+	rpc Hello (HelloRequest) returns (HelloResponse);
+}
+

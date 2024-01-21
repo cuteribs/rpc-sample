@@ -13,7 +13,6 @@ public static class WebApplicationExtensions
 				[FromBody] PingRequest request,
 				[FromServices] IEchoService service
 			) => service.Ping(request)
-
 		);
 
 		app.MapPost(
@@ -29,7 +28,6 @@ public static class WebApplicationExtensions
 				[FromBody] HelloRequest request,
 				[FromServices] IHelloService service
 			) => service.Hello(request)
-
 		);
 
 		return app;

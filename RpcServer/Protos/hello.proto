@@ -5,7 +5,7 @@ message HelloRequest {
    string Name = 1;
 }
 message HelloResponse {
-   string Message = 1;
+   repeated string Message = 1;
 }
 service HelloService {
    rpc Hello (HelloRequest) returns (HelloResponse);

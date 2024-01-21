@@ -1,29 +1,17 @@
-﻿<#@ template hostspecific="true" language="C#" debug="true" #>
+﻿<#@ template hostspecific="false" language="C#" debug="true" compilerOptions="/langversion:12" #>
 <#@ output extension=".cs" #>
+<#@ assembly name="NetStandard" #>
 <#@ assembly name="System.Core" #>
-<#@ assembly name="$(SolutionDir)RcpServer.Contracts\bin\Debug\netstandard2.0\RcpServer.Contracts.dll" #>
+<#@ assembly name="$(SolutionDir)RpcServer.Contracts\bin\Debug\netstandard2.0\RpcServer.Contracts.dll" #>
+<#@ assembly name="$(SolutionDir)RpcServer.Utilities\bin\Debug\netstandard2.0\RpcServer.Utilities.dll" #>
+<#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Reflection" #>
-<#@ import namespace="RpcServer" #>
 <#@ import namespace="RpcServer.Contracts" #>
+<#@ import namespace="RpcServer.Utilities" #>
 <#
-	var contractType = typeof(IServiceContract);
-	var services = contractType.Assembly.DefinedTypes.Where(t =>
-		t.IsInterface
-		&& t.ImplementedInterfaces.Contains(contractType)
-	);
-	
-	var endpoints = services.Select(s => new
-	{
-		ServiceName = s.Name,
-		Operations = s.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-			.Select(o => new
-			{
-				OperationName = o.Name,
-				ParameterName = o.GetParameters().FirstOrDefault()?.ParameterType.Name
-			})
-	});
+	var services = typeof(IGrpcContract).Assembly.CreateProtoServices(nameof(IGrpcContract));
 #>
 using Microsoft.AspNetCore.Mvc;
 using RpcServer.Contracts;
@@ -35,26 +23,22 @@ public static class WebApplicationExtensions
 	public static WebApplication MapPostServiceContracts(this WebApplication app)
 	{
 <#
-	foreach(var endpoint in endpoints)
+	foreach(var service in services)
 	{
-		foreach(var operation in endpoint.Operations)
+		foreach(var operation in service.Operations)
 		{
-			var pattern = $"/{endpoint.ServiceName.TrimStart('I')}/{operation.OperationName}";
+			var pattern = $"/{service.Name.TrimStart('I')}/{operation.Name}";
 #>
 		app.MapPost(
 			"<#= pattern #>",
 			(
-<# 
-			if (operation.ParameterName is null)
-			{
-#>
-				[FromServices] <#= endpoint.ServiceName #> service
-			) => service.<#= operation.OperationName #>()
+<#			if (operation.Request is null) { #>
+				[FromServices] <#= service.Name #> service
+			) => service.<#= operation.Name #>()
 <#			} else { #>
-				[FromBody] <#= operation.ParameterName #> request,
-				[FromServices] <#= endpoint.ServiceName #> service
-			) => service.<#= operation.OperationName #>(request)
-
+				[FromBody] <#= operation.Request #> request,
+				[FromServices] <#= service.Name #> service
+			) => service.<#= operation.Name #>(request)
 <#			} #>
 		);
 

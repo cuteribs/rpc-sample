@@ -1,7 +1,10 @@
+using ProtoBuf;
 using ProtoBuf.Grpc.Reflection;
 using ProtoBuf.Grpc.Server;
 using RpcServer.Contracts;
 using RpcServer.Services;
+using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace RpcServer;
 
@@ -20,8 +23,8 @@ public class Program
 	static void GenerateProtoFile()
 	{
 		var generator = new SchemaGenerator();
-		File.WriteAllText("echo.proto", generator.GetSchema<IEchoService>());
-		File.WriteAllText("hello.proto", generator.GetSchema<IHelloService>());
+		File.WriteAllText("Protos/echo.proto", generator.GetSchema<IEchoService>());
+		File.WriteAllText("Protos/hello.proto", generator.GetSchema<IHelloService>());
 	}
 
 	static void StartWebServer(string[] args)

@@ -1,0 +1,48 @@
+﻿<#@ template hostspecific="true" language="C#" debug="true" #>
+<#@ output extension=".proto" #>
+<#@ assembly name="NetStandard" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="C:\Users\lieliu\.nuget\packages\protobuf-net\2.4.8\lib\netstandard2.0\protobuf-net.dll" #>
+<#@ assembly name="C:\Users\lieliu\.nuget\packages\protobuf-net.grpc\1.1.1\lib\netstandard2.0\protobuf-net.Grpc.dll" #>
+<#@ assembly name="C:\Users\lieliu\.nuget\packages\grpc.core.api\2.51.0\lib\netstandard2.0\Grpc.Core.Api.dll" #>
+<#@ assembly name="$(SolutionDir)RpcServer.Contracts\bin\Debug\netstandard2.0\RpcServer.Contracts.dll" #>
+<#@ assembly name="$(SolutionDir)RpcServer.Utilities\bin\Debug\netstandard2.0\RpcServer.Utilities.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="RpcServer.Contracts" #>
+<#@ import namespace="RpcServer.Utilities" #>
+<#
+	var messages = typeof(IGrpcContract).Assembly.CreateProtoMessages();
+	var services = typeof(IGrpcContract).Assembly.CreateProtoServices(nameof(IGrpcContract));
+#>
+syntax = "proto3";
+package RpcServer.Contracts;
+import "google/protobuf/empty.proto";
+
+<#	foreach(var message in messages) {
+		if(message.IsEnum) { #>
+enum <#= message.Name #> {
+<#			if(!message.Members.Any(m => m.Tag == 0)) { #>
+	NONE = 0;
+<#			}
+			foreach(var member in message.Members) { 
+#>
+	<#= member.Name #> = <#= member.Tag #>;
+<#			}} else { #>
+message <#= message.Name #> {
+<#		foreach(var member in message.Members) { #>
+	<#= member.Type #> <#= member.Name #> = <#= member.Tag #>;
+<#		}} #>
+}
+
+<#	}
+	foreach(var service in services) { #>
+service <#= service.Name #> {
+<#		foreach(var operation in service.Operations) { #>
+	rpc <#= operation.Name #> (<#= operation.ProtoRequest #>) returns (<#= operation.ProtoResponse #>);
+<#		} #>
+}
+
+<#	} #>

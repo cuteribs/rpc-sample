@@ -1,0 +1,27 @@
+syntax = "proto3";
+package RpcServer.Contracts;
+import "google/protobuf/empty.proto";
+import "protobuf-net/bcl.proto"; // schema for protobuf-net's handling of core .NET types
+
+enum IpType {
+   ZERO = 0; // proto3 requires a zero value as the first item (it can be named anything)
+   IPv4 = 3;
+   IPv6 = 4;
+}
+message NetworkInfo {
+   string Ip = 1;
+   string Mac = 2;
+   IpType IpType = 3;
+}
+message PingRequest {
+   NetworkInfo ClientInfo = 1;
+}
+message PongResponse {
+   NetworkInfo ClientInfo = 1;
+   NetworkInfo ServerInfo = 2;
+   .bcl.DateTime Latency = 3;
+}
+service EchoService {
+   rpc Hello (.google.protobuf.Empty) returns (.google.protobuf.Empty);
+   rpc Ping (PingRequest) returns (PongResponse);
+}
