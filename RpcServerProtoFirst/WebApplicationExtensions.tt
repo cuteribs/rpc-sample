@@ -2,6 +2,8 @@
 <#@ output extension=".cs" #>
 <#@ assembly name="NetStandard" #>
 <#@ assembly name="System.Core" #>
+<#@ assembly name="$(USERPROFILE)\.nuget\packages\system.private.servicemodel\4.10.3\lib\netstandard2.0\System.Private.ServiceModel.dll" #>
+<#@ assembly name="$(USERPROFILE)\.nuget\packages\system.servicemodel.primitives\4.10.3\lib\netstandard2.0\System.ServiceModel.Primitives.dll" #>
 <#@ assembly name="$(SolutionDir)RpcServer.Contracts\bin\Debug\netstandard2.0\RpcServer.Contracts.dll" #>
 <#@ assembly name="$(SolutionDir)RpcServer.Utilities\bin\Debug\netstandard2.0\RpcServer.Utilities.dll" #>
 <#@ import namespace="System" #>
@@ -14,6 +16,7 @@
 	var services = typeof(IGrpcContract).Assembly.CreateProtoServices(nameof(IGrpcContract));
 #>
 using Microsoft.AspNetCore.Mvc;
+using Google.Protobuf.WellKnownTypes;
 using RpcServer.Contracts;
 
 namespace RpcServer;
@@ -32,14 +35,10 @@ public static class WebApplicationExtensions
 		app.MapPost(
 			"<#= pattern #>",
 			(
-<#			if (operation.Request is null) { #>
-				[FromServices] <#= service.Name #> service
-			) => service.<#= operation.Name #>()
-<#			} else { #>
 				[FromBody] <#= operation.Request #> request,
-				[FromServices] <#= service.Name #> service
-			) => service.<#= operation.Name #>(request)
-<#			} #>
+				[FromServices] <#= $"{service.Name}.{service.Name}Base" #> service,
+				HttpContext context
+			) => service.<#= operation.Name #>(request, context.ToCallContext())
 		);
 
 <#
@@ -48,4 +47,7 @@ public static class WebApplicationExtensions
 #>
 		return app;
 	}
+
+	public static HttpServerCallContext ToCallContext(this HttpContext context)
+		=> new(context);
 }

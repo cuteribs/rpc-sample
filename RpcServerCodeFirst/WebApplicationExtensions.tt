@@ -1,0 +1,55 @@
+﻿<#@ template hostspecific="false" language="C#" debug="true" compilerOptions="/langversion:12" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="NetStandard" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="$(USERPROFILE)\.nuget\packages\system.private.servicemodel\4.10.3\lib\netstandard2.0\System.Private.ServiceModel.dll" #>
+<#@ assembly name="$(USERPROFILE)\.nuget\packages\system.servicemodel.primitives\4.10.3\lib\netstandard2.0\System.ServiceModel.Primitives.dll" #>
+<#@ assembly name="$(SolutionDir)RpcServer.Contracts\bin\Debug\netstandard2.0\RpcServer.Contracts.dll" #>
+<#@ assembly name="$(SolutionDir)RpcServer.Utilities\bin\Debug\netstandard2.0\RpcServer.Utilities.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="RpcServer.Contracts" #>
+<#@ import namespace="RpcServer.Utilities" #>
+<#
+	var services = typeof(IGrpcContract).Assembly.CreateProtoServices(nameof(IGrpcContract));
+#>
+using Microsoft.AspNetCore.Mvc;
+using RpcServer.Contracts;
+
+namespace RpcServer;
+
+public static class WebApplicationExtensions
+{
+	public static WebApplication MapPostServiceContracts(this WebApplication app)
+	{
+<#
+	foreach(var service in services)
+	{
+		foreach(var operation in service.Operations)
+		{
+			var pattern = $"/{service.Name.TrimStart('I')}/{operation.Name}";
+#>
+		app.MapPost(
+			"<#= pattern #>",
+			(
+<#			if(operation.Request != "Empty") { #>
+				[FromBody] <#= operation.Request #> request,
+				[FromServices] <#= service.TypeName #> service,
+				HttpContext context
+			) => service.<#= operation.Name #>(request)
+<#			} else { #>
+				[FromServices] <#= service.TypeName #> service,
+				HttpContext context
+			) => service.<#= operation.Name #>()
+<#			} #>
+		);
+
+<#
+		}
+	}
+#>
+		return app;
+	}
+}

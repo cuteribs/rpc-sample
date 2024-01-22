@@ -1,10 +1,9 @@
-using ProtoBuf;
+using Microsoft.AspNetCore.Http.Json;
 using ProtoBuf.Grpc.Reflection;
 using ProtoBuf.Grpc.Server;
 using RpcServer.Contracts;
 using RpcServer.Services;
-using System.Reflection;
-using System.Runtime.Serialization;
+using System.Text.Json;
 
 namespace RpcServer;
 
@@ -42,6 +41,7 @@ public class Program
 		services.AddScoped<IEchoService, EchoService>();
 		services.AddScoped<IHelloService, HelloService>();
 
+		services.Configure<JsonOptions>(o => o.SerializerOptions.PropertyNamingPolicy = null);
 		services.AddEndpointsApiExplorer()
 			.AddSwaggerGen();
 
@@ -51,8 +51,9 @@ public class Program
 			.UseSwaggerUI();
 
 		// map gRPC services
-		app.MapGrpcService<IEchoService>();
-		app.MapGrpcService<IHelloService>();
+		app.MapGrpcService<EchoService>();
+		app.MapGrpcService<HelloService>();
+
 
 		// optional - map gRPC service reflection
 		app.MapCodeFirstGrpcReflectionService();

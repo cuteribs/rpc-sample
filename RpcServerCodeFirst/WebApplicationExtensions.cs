@@ -11,14 +11,16 @@ public static class WebApplicationExtensions
 			"/EchoService/Ping",
 			(
 				[FromBody] PingRequest request,
-				[FromServices] IEchoService service
+				[FromServices] IEchoService service,
+				HttpContext context
 			) => service.Ping(request)
 		);
 
 		app.MapPost(
 			"/EchoService/Hello",
 			(
-				[FromServices] IEchoService service
+				[FromServices] IEchoService service,
+				HttpContext context
 			) => service.Hello()
 		);
 
@@ -26,7 +28,8 @@ public static class WebApplicationExtensions
 			"/HelloService/Hello",
 			(
 				[FromBody] HelloRequest request,
-				[FromServices] IHelloService service
+				[FromServices] IHelloService service,
+				HttpContext context
 			) => service.Hello(request)
 		);
 

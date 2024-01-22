@@ -5,11 +5,20 @@ namespace RpcServer.Services;
 
 public class EchoService : IEchoService
 {
-	public ValueTask Hello(CallContext? callContext = null)
-		=> new();
+	public Task Hello()
+	{
+		Console.WriteLine("hello");
+		return Task.CompletedTask;
+	}
 
-	public ValueTask<PongResponse> Ping(PingRequest request, CallContext? callContext = null)
-		=> new(new PongResponse
+	public Task Hello(CallContext callContext)
+	{
+		Console.WriteLine("hello call");
+		return Task.CompletedTask;
+	}
+
+	public Task<PongResponse> Ping(PingRequest request)
+		=> Task.FromResult(new PongResponse
 		{
 			ClientInfo = new()
 			{
@@ -21,6 +30,6 @@ public class EchoService : IEchoService
 				Ip = "1.1.1.1",
 				Mac = "00:00:00:00:00:00"
 			},
-			Latency = DateTime.Now
+			Latency = DateTime.UtcNow
 		});
 }

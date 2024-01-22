@@ -1,5 +1,6 @@
-﻿using ProtoBuf;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Runtime.Serialization;
+using System.ServiceModel;
 
 namespace RpcServer.Utilities;
 
@@ -63,7 +64,7 @@ public static class GrpcContractExtensions
 	public static IEnumerable<ProtoMessage> CreateProtoMessages(this Assembly assembly)
 	{
 		var messages = assembly.GetTypes()
-			.Where(t => Attribute.IsDefined(t, typeof(ProtoContractAttribute)));
+			.Where(t => Attribute.IsDefined(t, typeof(DataContractAttribute)));
 
 		return messages.Select(c => new ProtoMessage
 		{
@@ -79,12 +80,12 @@ public static class GrpcContractExtensions
 						Tag = Convert.ToInt32(v)
 					})
 				: c.GetProperties()?
-					.Where(p => Attribute.IsDefined(p, typeof(ProtoMemberAttribute)))
+					.Where(p => Attribute.IsDefined(p, typeof(DataMemberAttribute)))
 					.Select(p =>
 					{
-						var attribute = p.GetCustomAttribute(typeof(ProtoMemberAttribute));
+						var attribute = p.GetCustomAttribute(typeof(DataMemberAttribute));
 						var tag = attribute?.GetType()
-							.GetProperty("Tag")
+							.GetProperty("Order")
 							.GetValue(attribute);
 						return new ProtoField
 						{
@@ -103,13 +104,15 @@ public static class GrpcContractExtensions
 			.Where(t => t.IsInterface && t.GetInterface(baseInterface) != null);
 		return services.Select(s => new ProtoService
 		{
-			Name = s.Name,
+			TypeName = s.Name,
+			Name = s.GetCustomAttribute<ServiceContractAttribute>()?.Name ?? s.Name,
 			Operations = s.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+				.Where(m => m.GetCustomAttribute<OperationContractAttribute>() != null)
 				.Select(o =>
 				{
 					var request = o.GetParameters().FirstOrDefault()?.ParameterType;
 
-					if (request?.GetCustomAttribute(typeof(ProtoContractAttribute)) == null)
+					if (request?.GetCustomAttribute(typeof(DataContractAttribute)) == null)
 					{
 						request = null;
 					}
@@ -117,7 +120,7 @@ public static class GrpcContractExtensions
 					return new ProtoOperation
 					{
 						Name = o.Name,
-						Request = request?.Name,
+						Request = request?.Name ?? "Empty",
 						Response = o.ReturnType?.Name,
 						ProtoRequest = request?.GetProtoType() ?? ProtoTypeEmpty,
 						ProtoResponse = o.ReturnType?.GetProtoType() ?? ProtoTypeEmpty
@@ -129,6 +132,7 @@ public static class GrpcContractExtensions
 
 public class ProtoService
 {
+	public string TypeName { get; set; } = default!;
 	public string Name { get; set; } = default!;
 	public IEnumerable<ProtoOperation> Operations { get; set; } = default!;
 }

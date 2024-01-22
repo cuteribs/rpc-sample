@@ -2,9 +2,7 @@
 <#@ output extension=".proto" #>
 <#@ assembly name="NetStandard" #>
 <#@ assembly name="System.Core" #>
-<#@ assembly name="C:\Users\lieliu\.nuget\packages\protobuf-net\2.4.8\lib\netstandard2.0\protobuf-net.dll" #>
-<#@ assembly name="C:\Users\lieliu\.nuget\packages\protobuf-net.grpc\1.1.1\lib\netstandard2.0\protobuf-net.Grpc.dll" #>
-<#@ assembly name="C:\Users\lieliu\.nuget\packages\grpc.core.api\2.51.0\lib\netstandard2.0\Grpc.Core.Api.dll" #>
+<#@ assembly name="$(USERPROFILE)\.nuget\packages\system.private.servicemodel\4.10.3\lib\netstandard2.0\System.Private.ServiceModel.dll" #>
 <#@ assembly name="$(SolutionDir)RpcServer.Contracts\bin\Debug\netstandard2.0\RpcServer.Contracts.dll" #>
 <#@ assembly name="$(SolutionDir)RpcServer.Utilities\bin\Debug\netstandard2.0\RpcServer.Utilities.dll" #>
 <#@ import namespace="System" #>
@@ -20,6 +18,7 @@
 syntax = "proto3";
 package RpcServer.Contracts;
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 <#	foreach(var message in messages) {
 		if(message.IsEnum) { #>

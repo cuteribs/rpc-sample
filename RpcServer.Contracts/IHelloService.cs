@@ -1,25 +1,25 @@
-﻿using ProtoBuf;
-using ProtoBuf.Grpc;
-using ProtoBuf.Grpc.Configuration;
+﻿using System.Runtime.Serialization;
+using System.ServiceModel;
 
 namespace RpcServer.Contracts;
 
-[Service]
+[ServiceContract]
 public interface IHelloService : IGrpcContract
 {
-	ValueTask<HelloResponse> Hello(HelloRequest request, CallContext? callContext = null);
+	[OperationContract]
+	Task<HelloResponse> Hello(HelloRequest request);
 }
 
-[ProtoContract]
+[DataContract]
 public class HelloRequest
 {
-	[ProtoMember(1)]
+	[DataMember(Order = 1)]
 	public string Name { get; set; } = default!;
 }
 
-[ProtoContract]
+[DataContract]
 public class HelloResponse
 {
-	[ProtoMember(1)]
+	[DataMember(Order = 1)]
 	public IEnumerable<string> Message { get; set; } = default!;
 }

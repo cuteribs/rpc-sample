@@ -1,6 +1,7 @@
 ﻿syntax = "proto3";
 package RpcServer.Contracts;
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 message PingRequest {
 	NetworkInfo ClientInfo = 1;
@@ -32,12 +33,12 @@ message HelloResponse {
 	repeated string Message = 1;
 }
 
-service IEchoService {
+service Echo {
 	rpc Ping (PingRequest) returns (PongResponse);
 	rpc Hello (.google.protobuf.Empty) returns (.google.protobuf.Empty);
 }
 
-service IHelloService {
+service Hello {
 	rpc Hello (HelloRequest) returns (HelloResponse);
 }
 

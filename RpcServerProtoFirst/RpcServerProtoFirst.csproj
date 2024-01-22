@@ -8,13 +8,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.60.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.1.1" />
-		<PackageReference Include="protobuf-net.Grpc.AspNetCore.Reflection" Version="1.1.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\RpcServer.Contracts\RpcServer.Contracts.csproj" />
+		<ProtoBuf Include="ProtoGenerator.proto" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -22,27 +22,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="ProtoGenerator.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>ProtoGenerator.proto</LastGenOutput>
+		</None>
+		<None Update="ProtoGenerator.proto">
+			<DependentUpon>ProtoGenerator.tt</DependentUpon>
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="WebApplicationExtensions.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>WebApplicationExtensions.cs</LastGenOutput>
+		</None>
 		<Compile Update="WebApplicationExtensions.cs">
 			<DependentUpon>WebApplicationExtensions.tt</DependentUpon>
 			<DesignTime>True</DesignTime>
 			<AutoGen>True</AutoGen>
 		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="ProtoGenerator.proto">
-		  <DesignTime>True</DesignTime>
-		  <AutoGen>True</AutoGen>
-		  <DependentUpon>ProtoGenerator.tt</DependentUpon>
-		</None>
-		<None Update="ProtoGenerator.tt">
-		  <Generator>TextTemplatingFileGenerator</Generator>
-		  <LastGenOutput>ProtoGenerator.proto</LastGenOutput>
-		</None>
-		<None Update="WebApplicationExtensions.tt">
-			<Generator>TextTemplatingFileGenerator</Generator>
-			<LastGenOutput>WebApplicationExtensions.cs</LastGenOutput>
-		</None>
 	</ItemGroup>
 
 </Project>
